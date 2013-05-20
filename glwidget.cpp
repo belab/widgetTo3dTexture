@@ -6,12 +6,8 @@
 #include <QApplication>
 #include <qgraphicssceneevent.h>
 
-#include "glext.h"
 
 #include <map>
-
-PFNGLACTIVETEXTUREPROC pGlActiveTexture = NULL;
-#define glActiveTexture pGlActiveTexture
 
 // http://www.scratchapixel.com/lessons/3d-basic-lessons/lesson-9-ray-triangle-intersection/m-ller-trumbore-algorithm/
 struct IsectData { float t; float u, v; };
@@ -126,14 +122,15 @@ void GlWidget::updateTexture( const QList<QRectF>& )
 {
     QPainter painter( &(cube.pixmap) );
     scene->render( &painter );
+    painter.setBrush(Qt::green);
+    QRect highLight(lastMousePosition-QPoint(5,5),QSize(10,10));
+    painter.drawEllipse(highLight);
     cube.texture = bindTexture(cube.pixmap);
     updateGL();
 }
 
 void GlWidget::initializeGL()
 {
-    glActiveTexture = (PFNGLACTIVETEXTUREPROC) wglGetProcAddress((LPCSTR) "glActiveTexture");
-
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
@@ -144,8 +141,18 @@ void GlWidget::initializeGL()
     shaderProgram.link();
 
     cube.texture = bindTexture(cube.pixmap);
-}
 
+    // Set nearest filtering mode for texture minification
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    // Set bilinear filtering mode for texture magnification
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Wrap texture coordinates by repeating
+    // f.ex. texture coordinate (1.1, 1.2) is same as (0.1, 0.2)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
 void GlWidget::resizeGL(int width, int height)
 {
     if (height == 0) {
@@ -176,13 +183,9 @@ void GlWidget::paintGL()
 
     shaderProgram.bind();
 
-    shaderProgram.setUniformValue("mvpMatrix", pMatrix * vMatrix * mMatrix);
+    shaderProgram.setUniformValue("mvp_matrix", pMatrix * vMatrix * mMatrix);
 
     shaderProgram.setUniformValue("texture", 0);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, cube.texture);
-    glActiveTexture(0);
 
     shaderProgram.setAttributeArray("vertex", cube.vertices.constData());
     shaderProgram.enableAttributeArray("vertex");
@@ -230,7 +233,6 @@ void GlWidget::mousePressEvent(QMouseEvent *event)
     if( cube.intersect(rayOrg, rayDir, texCoords))
     {
         QPointF scenePos(texCoords.x()*widget->width(), texCoords.y()*widget->height());
-        lastMousePosition = event->pos();
         QGraphicsSceneMouseEvent mouseEvent(QEvent::GraphicsSceneMousePress);
         mouseEvent.setWidget(this);
         mouseEvent.setButtonDownScenePos(event->button(), scenePos);
@@ -246,6 +248,8 @@ void GlWidget::mousePressEvent(QMouseEvent *event)
 
         QApplication::sendEvent( scene, &mouseEvent );
     }
+    lastMousePosition = event->pos();
+
     QGLWidget::mousePressEvent(event);
 }
 
@@ -271,6 +275,8 @@ void GlWidget::mouseReleaseEvent(QMouseEvent *event)
 
         QApplication::sendEvent( scene, &mouseEvent );
     }
+    lastMousePosition = event->pos();
+
     QGLWidget::mouseReleaseEvent(event);
 }
 
@@ -323,7 +329,6 @@ void GlWidget::mouseMoveEvent(QMouseEvent *event)
 
         updateGL();
     }
-
     lastMousePosition = event->pos();
 
     event->accept();
