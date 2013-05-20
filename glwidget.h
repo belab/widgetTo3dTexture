@@ -6,6 +6,8 @@
 #include <QPixmap>
 #include <QGraphicsScene>
 class Form;
+class QGraphicsItem;
+
 struct Cube
 {
     QVector<QVector3D> vertices;
@@ -49,6 +51,7 @@ private:
     QPoint lastMousePosition;
     Form* widget;
     QGraphicsScene* scene;
+    QPointF lastSceneMousePosition;
     Cube cube;
 };
 

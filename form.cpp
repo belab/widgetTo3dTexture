@@ -51,16 +51,3 @@ void Form::on_pushButton_4_clicked(bool)
     ui->label_4->setText("clicked");
 }
 
-void Form::paintEvent(QPaintEvent* )
-{
-    QPainter painter(this);
-    painter.setBrush(Qt::yellow);
-    QRect highLight(currentMouse-QPoint(5,5),QSize(10,10));
-    painter.drawEllipse(highLight);
-}
-
-void Form::setCurrentMouse(QPoint pos)
-{
-    currentMouse = pos;
-    update();
-}

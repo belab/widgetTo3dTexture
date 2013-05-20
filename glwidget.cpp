@@ -4,8 +4,9 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QApplication>
-#include <qgraphicssceneevent.h>
-
+//#include <qgraphicssceneevent.h>
+#include <QGraphicsSceneEvent>
+#include <QGraphicsItem>
 
 #include <map>
 
@@ -123,7 +124,7 @@ void GlWidget::updateTexture( const QList<QRectF>& )
     QPainter painter( &(cube.pixmap) );
     scene->render( &painter );
     painter.setBrush(Qt::green);
-    QRect highLight(lastMousePosition-QPoint(5,5),QSize(10,10));
+    QRect highLight(lastSceneMousePosition.toPoint()-QPoint(5,5),QSize(10,10));
     painter.drawEllipse(highLight);
     cube.texture = bindTexture(cube.pixmap);
     updateGL();
@@ -244,8 +245,10 @@ void GlWidget::mousePressEvent(QMouseEvent *event)
         mouseEvent.setButtons(event->buttons());
         mouseEvent.setButton(event->button());
         mouseEvent.setModifiers(event->modifiers());
+
         mouseEvent.setAccepted(false);
 
+        lastSceneMousePosition = scenePos;
         QApplication::sendEvent( scene, &mouseEvent );
     }
     lastMousePosition = event->pos();
@@ -273,6 +276,7 @@ void GlWidget::mouseReleaseEvent(QMouseEvent *event)
         mouseEvent.setModifiers(event->modifiers());
         mouseEvent.setAccepted(false);
 
+        lastSceneMousePosition = scenePos;
         QApplication::sendEvent( scene, &mouseEvent );
     }
     lastMousePosition = event->pos();
@@ -290,7 +294,6 @@ void GlWidget::mouseMoveEvent(QMouseEvent *event)
     if( cube.intersect(rayOrg, rayDir, texCoords))
     {
         QPointF scenePos(texCoords.x()*widget->width(), texCoords.y()*widget->height());
-        widget->setCurrentMouse(scenePos.toPoint());
         QGraphicsSceneMouseEvent mouseEvent(QEvent::GraphicsSceneMouseMove);
         mouseEvent.setWidget(this);
         mouseEvent.setScenePos(scenePos);
@@ -302,7 +305,9 @@ void GlWidget::mouseMoveEvent(QMouseEvent *event)
         mouseEvent.setModifiers(event->modifiers());
         mouseEvent.setAccepted(false);
 
+        lastSceneMousePosition = scenePos;
         QApplication::sendEvent( scene, &mouseEvent );
+        updateTexture(QList<QRectF>());
     }
 //    QGLWidget::mouseMoveEvent(event);
 //    return;
