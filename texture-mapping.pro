@@ -6,10 +6,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
            glwidget.cpp \
-    form.cpp
+    form.cpp \
+    mainwidget.cpp
 
 HEADERS += glwidget.h \
-    form.h
+    form.h \
+    mainwidget.h
 
 OTHER_FILES += fragmentShader.fsh\
                vertexShader.vsh
@@ -17,4 +19,5 @@ OTHER_FILES += fragmentShader.fsh\
 RESOURCES += resources.qrc
 
 FORMS += \
-    form.ui
+    form.ui \
+    mainwidget.ui

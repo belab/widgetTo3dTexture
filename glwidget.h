@@ -27,7 +27,7 @@ public:
     GlWidget(QWidget *parent = 0);
     ~GlWidget();
     QSize sizeHint() const;
-
+    void init( QGraphicsScene* scene );
     void getMousePickRay(const QPointF &mouse, QVector3D& rayOrg, QVector3D& rayDir);
 public slots:
     void updateTexture( const QList<QRectF>& );

@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
   <property name="styleSheet">
    <string notr="true">QProgressBar:horizontal {
     border: 1px solid #3A3939;
@@ -39,6 +42,7 @@ QWidget
     background-color: #302F2F;
     selection-background-color:#78879b;
     selection-color: black;
+	background: transparent;
 }
 
 QWidget:item:hover
@@ -445,6 +449,7 @@ QPushButton
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 5px;
+	background: transparent;
 }
 
 QPushButton:disabled

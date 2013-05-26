@@ -16,6 +16,7 @@ class Form : public QWidget
 public:
     explicit Form(QWidget *parent, GlWidget* widget);
     ~Form();
+    void resizeEvent(QResizeEvent *);
 private slots:
     void on_pushButton_1_clicked(bool);
     void on_pushButton_2_clicked(bool);

@@ -163,3 +163,5 @@ pip-log.txt
 .DS_Store
 
 ui_*.h
+Makefile
+Makefile.*

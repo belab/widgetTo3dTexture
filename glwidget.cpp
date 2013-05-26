@@ -103,12 +103,7 @@ GlWidget::GlWidget(QWidget *parent)
     alpha = 25;
     beta = -25;
     distance = 2.5;
-    widget = new Form(0, this);
-    this->setMouseTracking(true);
-    scene = new QGraphicsScene;
-    scene->addWidget(widget);
-    connect( scene, SIGNAL(changed(const QList<QRectF>&)), this, SLOT( updateTexture(const QList<QRectF>&)) );
-}
+ }
 
 GlWidget::~GlWidget()
 {
@@ -119,11 +114,23 @@ QSize GlWidget::sizeHint() const
     return QSize(250, 250);
 }
 
+void GlWidget::init(QGraphicsScene *scene)
+{
+    widget = new Form(0, this);
+    this->setMouseTracking(true);
+    this->scene = scene;
+    scene->addWidget(widget);
+    connect( scene, SIGNAL(changed(const QList<QRectF>&)), this, SLOT( updateTexture(const QList<QRectF>&)) );
+}
+
 void GlWidget::updateTexture( const QList<QRectF>& )
 {
+    cube.pixmap.fill(QColor(0,0,0,0));
     QPainter painter( &(cube.pixmap) );
+//    painter.setBackgroundMode( Qt::TransparentMode );
     scene->render( &painter );
     painter.setBrush(Qt::green);
+    painter.setBackground(QColor(50,12,0,0));
     QRect highLight(lastSceneMousePosition.toPoint()-QPoint(5,5),QSize(10,10));
     painter.drawEllipse(highLight);
     cube.texture = bindTexture(cube.pixmap);
@@ -133,7 +140,7 @@ void GlWidget::updateTexture( const QList<QRectF>& )
 void GlWidget::initializeGL()
 {
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_CULL_FACE);
 
     qglClearColor(QColor(Qt::black));
 
@@ -169,6 +176,8 @@ void GlWidget::resizeGL(int width, int height)
 void GlWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     QMatrix4x4 mMatrix;
     QMatrix4x4 vMatrix;
@@ -237,11 +246,11 @@ void GlWidget::mousePressEvent(QMouseEvent *event)
         QGraphicsSceneMouseEvent mouseEvent(QEvent::GraphicsSceneMousePress);
         mouseEvent.setWidget(this);
         mouseEvent.setButtonDownScenePos(event->button(), scenePos);
-//        mouseEvent.setButtonDownScreenPos(event->button(), event->globalPos());
+        mouseEvent.setButtonDownScreenPos(event->button(), scenePos.toPoint());
         mouseEvent.setScenePos(scenePos);
-//        mouseEvent.setScreenPos(event->globalPos());
-        mouseEvent.setLastScenePos(scenePos);
-//        mouseEvent.setLastScreenPos(event->globalPos());
+        mouseEvent.setScreenPos(scenePos.toPoint());
+        mouseEvent.setLastScenePos(lastSceneMousePosition);
+        mouseEvent.setLastScreenPos(lastSceneMousePosition.toPoint());
         mouseEvent.setButtons(event->buttons());
         mouseEvent.setButton(event->button());
         mouseEvent.setModifiers(event->modifiers());
@@ -268,9 +277,9 @@ void GlWidget::mouseReleaseEvent(QMouseEvent *event)
         QGraphicsSceneMouseEvent mouseEvent(QEvent::GraphicsSceneMouseRelease);
         mouseEvent.setWidget(this);
         mouseEvent.setScenePos(scenePos);
-//        mouseEvent.setScreenPos(event->globalPos());
-        mouseEvent.setLastScenePos(scenePos);
-//        mouseEvent.setLastScreenPos(event->globalPos());
+        mouseEvent.setScreenPos(scenePos.toPoint());
+        mouseEvent.setLastScenePos(lastSceneMousePosition);
+        mouseEvent.setLastScreenPos(lastSceneMousePosition.toPoint());
         mouseEvent.setButtons(event->buttons());
         mouseEvent.setButton(event->button());
         mouseEvent.setModifiers(event->modifiers());
@@ -297,9 +306,9 @@ void GlWidget::mouseMoveEvent(QMouseEvent *event)
         QGraphicsSceneMouseEvent mouseEvent(QEvent::GraphicsSceneMouseMove);
         mouseEvent.setWidget(this);
         mouseEvent.setScenePos(scenePos);
-        //mouseEvent.setScreenPos(event->globalPos());
-        mouseEvent.setLastScenePos(scenePos);
-        //mouseEvent.setLastScreenPos(event->globalPos());
+        mouseEvent.setScreenPos(scenePos.toPoint());
+        mouseEvent.setLastScenePos(lastSceneMousePosition);
+        mouseEvent.setLastScreenPos(lastSceneMousePosition.toPoint());
         mouseEvent.setButtons(event->buttons());
         mouseEvent.setButton(event->button());
         mouseEvent.setModifiers(event->modifiers());
