@@ -11,6 +11,7 @@ Form::Form(QWidget *parent, GlWidget *widget) :
     ui(new Ui::Form)
 {
     ui->setupUi(this);
+    ui->webView->settings()->setAttribute(QWebSettings::PluginsEnabled, true);
     setMouseTracking(true);
     //setAttribute( Qt::WA_TranslucentBackground );
     //setWindowOpacity(0.01f);

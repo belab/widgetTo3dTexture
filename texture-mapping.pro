@@ -1,4 +1,4 @@
-QT += core gui opengl
+QT += core gui opengl webkitwidgets network
 
 TARGET = texture-mapping
 
